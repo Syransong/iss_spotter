@@ -8,25 +8,42 @@ const request = require('request');
  *   - The IP address as a string (null if error). Example: "162.245.144.188"
  */
 
-const fetchMyIP = function(callback) {
-  // use request to fetch IP address from JSON API
-  request('https://api.ipify.org?format=json', (error, response, body) => {
+// const fetchMyIP = function(callback) {
+//   // use request to fetch IP address from JSON API
+//   request('https://api.ipify.org?format=json', (error, response, body) => {
     
-    if (error) {
-      return callback(error, null);
-    }
+//     if (error) {
+//       return callback(error, null);
+//     }
 
-    if (response.statusCode !== 200) {
-      callback(Error(`Status Code ${response.statusCode} when fetching IP. Response: ${body}`), null);
+//     if (response.statusCode !== 200) {
+//       callback(Error(`Status Code ${response.statusCode} when fetching IP. Response: ${body}`), null);
+//       return;
+//     }
+    
+//     const ip = JSON.parse(body).ip;
+//     callback(null, ip);
+  
+//   });
+// };
+
+const fetchCoordsByIP = function(ip, callback) {
+  //add function to the object properties being exported from iss.js
+  request(`https://freegeoip.app/json/${ip}`, (error, response, body) => {
+    if (error) {
+      callback(error, null);
       return;
     }
-    
-    const ip = JSON.parse(body).ip;
-    callback(null, ip);
-  
-  });
-};
 
-fetchMyIP();
+    if (response.statusCode != 200) {
+      callback(Error(`Status Code ${response.statusCode} when fetching Coordinates for IP: ${body}`), null);
+      return;
+    }
 
-module.exports = { fetchMyIP };
+    const { latitude, longitude } = JSON.parse(body);
+
+    callback(null, { latitude, longitude });
+  })
+}
+
+module.exports = {  fetchCoordsByIP };
